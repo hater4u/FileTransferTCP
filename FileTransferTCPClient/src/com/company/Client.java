@@ -11,37 +11,38 @@ public class Client {
         socket = new Socket(addr,port);
     }
 
-    public void loadFile(String fname,DataOutputStream outStream)throws IOException{
+    public void loadFile(String fname,DataOutputStream outStream) {
         File file = new File(fname);
-        if(file.length() != 0) {
-            outStream.writeLong(file.length());
-            outStream.writeUTF(file.getName());
-            FileInputStream inputFile = new FileInputStream(file);
-            byte[] buffer = new byte[64 * 1024];
-            int count;
-            while ((count = inputFile.read(buffer)) != -1) {
-                outStream.write(buffer, 0, count);
+        try (FileInputStream inputFile = new FileInputStream(file)) {
+            if (file.length ()!= 0) {
+                outStream.writeLong(file.length());
+                outStream.writeUTF(file.getName());
+                byte[] buffer = new byte[64 * 1024];
+                int count;
+                while ((count = inputFile.read(buffer)) != -1) {
+                    outStream.write(buffer, 0, count);
+                }
+                outStream.flush();
+                System.out.println("File transferred " + fname);
+            } else {
+                System.out.println("Empty file");
             }
-            outStream.flush();
-            inputFile.close();
-            outStream.close();
-            System.out.println("File transferred " + fname);
-        }else{
-            System.out.println("Empty file");
+        } catch (IOException e) {
+            System.out.println("Transfer file failed:" + e.getMessage());
         }
+
     }
 
     public void work(){
-        try(
-                DataOutputStream outStream=new DataOutputStream(socket.getOutputStream());
-                BufferedReader br=new BufferedReader(new InputStreamReader(System.in))){
+        try (DataOutputStream outStream=new DataOutputStream(socket.getOutputStream());
+                BufferedReader br=new BufferedReader(new InputStreamReader(System.in))) {
             String fileName="";
             System.out.println("Enter file: ");
             fileName = br.readLine();
             if(fileName.isEmpty() || fileName.getBytes().length > 4096) {
-                System.out.println("Incorrect fileName try again: ");
+                throw new IllegalArgumentException("Incorrect name of file");
             }
-            loadFile(fileName,outStream);
+            loadFile(fileName, outStream);
         }catch(Exception e){
             System.out.println(e);
         }

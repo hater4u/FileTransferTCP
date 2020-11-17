@@ -24,7 +24,6 @@ public class Server {
         Runtime.getRuntime().addShutdownHook(new Thread(
                 () -> {
                     try {
-//                        closeClients();
                         if (!serverSocket.isClosed()) {
                             serverSocket.close();
                         }

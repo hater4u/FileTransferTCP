@@ -19,10 +19,13 @@ public class ServerThread extends Thread{
     private void receiveFile(String fileName, long fileSize) {
         try {
             byte[] buffer = new byte[64 * 1024];
-//            FileOutputStream outputFile = new FileOutputStream(file);
             Path filePath = Paths.get("uploads\\" + fileName);
+            StringBuilder realFileName = new StringBuilder(fileName);
             if (!Files.isDirectory(filePath)) {
-                Files.deleteIfExists(filePath);
+                while (Files.exists(filePath)) {
+                    realFileName.insert(0, "1");
+                    filePath = Paths.get("uploads\\" + realFileName.toString());
+                }
             } else {
                 throw new FileNotFoundException("It's not a file");
             }
